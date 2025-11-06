@@ -3,10 +3,7 @@ const router = express.Router();
 const Workout = require('../models/workout');
 const verifyToken = require('../middleware/verify-token');
 
-// This middleware will be applied to all routes in this file
 router.use(verifyToken);
-
-// Base Route for this controller: /api/workouts
 
 // POST /api/workouts - CREATE a new workout
 router.post('/', async (req, res) => {
@@ -27,7 +24,7 @@ router.get('/', async (req, res) => {
   try {
     const workouts = await Workout.find({ author: req.user._id })
       .populate('author')
-      .sort({ date: 'desc' }); // Sort by date descending
+      .sort({ date: 'desc' }); 
     res.status(200).json(workouts);
   } catch (err) {
     res.status(500).json({ err: err.message });
@@ -68,8 +65,8 @@ router.put('/:workoutId', async (req, res) => {
     const updatedWorkout = await Workout.findByIdAndUpdate(
       req.params.workoutId,
       req.body,
-      { new: true } // This returns the updated document
-    ).populate('author'); // Re-populate author after update
+      { new: true }
+    ).populate('author'); 
 
     res.status(200).json(updatedWorkout);
   } catch (err) {
@@ -96,11 +93,7 @@ router.delete('/:workoutId', async (req, res) => {
   }
 });
 
-
 // === Embedded Exercise Routes ===
-// Based on the "comments" logic from hoots.js
-
-// POST /api/workouts/:workoutId/exercises - CREATE a new exercise for a workout
 router.post('/:workoutId/exercises', async (req, res) => {
   try {
     const workout = await Workout.findById(req.params.workoutId);
@@ -112,11 +105,9 @@ router.post('/:workoutId/exercises', async (req, res) => {
       return res.status(403).json({ err: 'You are not authorized to add exercises here.' });
     }
 
-    // Push the new exercise data from req.body into the 'exercises' array
     workout.exercises.push(req.body);
-    await workout.save(); // Save the parent workout document
+    await workout.save();
 
-    // Get the newly created exercise (it's the last one in the array)
     const newExercise = workout.exercises[workout.exercises.length - 1];
 
     res.status(201).json(newExercise);

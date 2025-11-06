@@ -3,29 +3,26 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const User = require('../models/user');
+const User = require('../models/user'); 
 
 const saltRounds = 12;
 
 router.post('/signup', async (req, res) => {
   try {
-    // Check if the email is already taken
+  
     const userInDatabase = await User.findOne({ email: req.body.email });
     if (userInDatabase) {
       return res.status(409).json({ err: 'Email already taken.' });
     }
     
-    // Create the new user
     const user = await User.create({
       name: req.body.name,
       email: req.body.email,
       hashedPassword: bcrypt.hashSync(req.body.password, saltRounds)
     });
 
-    // Create a payload for the token
     const payload = { name: user.name, email: user.email, _id: user._id };
 
-    // Sign the token
     const token = jwt.sign({ payload }, process.env.JWT_SECRET);
 
     res.status(201).json({ token });
